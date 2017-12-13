@@ -50,8 +50,16 @@ max = runs.groupby('playerID')['age'].max()
 max.hist(bins=int(max.max()-max.min()+1),align='left')
 print max.max(), max.min()
 
+j = plt.figure(5)
+min = runs.groupby('playerID')['age'].min()
+min.hist(bins=int(min.max()-min.min()+1),align='left')
+print min.max(), min.min()
+
+
+
 f.show()
 g.show()
 h.show()
 i.show()
+j.show()
 raw_input()
