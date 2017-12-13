@@ -29,37 +29,61 @@ runs['age'] = runs.apply(age,axis=1)
 runs = runs.dropna()
 print runs
 
-f = plt.figure(1)
-runs.groupby('age')['R/G'].sum().plot()
-#seems for sure like the best players are a bit under 30
-#but wait...this result seems too perfect... I used the sum
-#It could just be that the majority of players are at that age
+#group by age and extract R/G column
+age_rg = runs.groupby('age')['R/G']
 
-#So let's count the number of players at each age over the years
-h = plt.figure(2)
-runs.groupby('age')['R/G'].count().plot()
-#Indeed, the majority of players are just under 30. 
+plots = []
+#R/G sum against age
+plots.append(plt.figure(len(plots)+1))
+age_rg.sum().plot()
 
-#So let's look at the mean of the R/G ratio at each age
-g = plt.figure(3)
-runs.groupby('age')['R/G'].mean().plot()
-#Wow! much different
+#count against age
+plots.append(plt.figure(len(plots)+1))
+age_rg.count().plot()
 
-i = plt.figure(4)
+#R/G mean against age
+plots.append(plt.figure(len(plots)+1))
+age_rg.mean().plot()
+
+#Age players stop playing
+plots.append(plt.figure(len(plots)+1))
 max = runs.groupby('playerID')['age'].max()
 max.hist(bins=int(max.max()-max.min()+1),align='left')
 print max.max(), max.min()
 
-j = plt.figure(5)
+#Age players start playing
+plots.append(plt.figure(len(plots)+1))
 min = runs.groupby('playerID')['age'].min()
 min.hist(bins=int(min.max()-min.min()+1),align='left')
 print min.max(), min.min()
 
+#players over 50
+print runs[runs['age']>50]
 
+#players with over 50 games
+runs_g_over_50 = runs[runs['G']>50]
 
-f.show()
-g.show()
-h.show()
-i.show()
-j.show()
+plots.append(plt.figure(len(plots)+1))
+runs_g_over_50.groupby('age')['R/G'].count().plot()
+
+plots.append(plt.figure(len(plots)+1))
+runs_g_over_50.groupby('age')['R/G'].mean().plot()
+
+def plot_player(name,games=0):   
+    plots.append(plt.figure(len(plots)+1))
+    table = runs[runs['G']>games]
+    p = table[table['playerID']==name]
+    r = p.loc[:,['R/G']].values
+    a = p.loc[:,['age']].values
+    plt.plot(a,r)
+
+plot_player('orourji01',1)
+plot_player('minosmi01',1)
+
+for i in range(3):
+    name = np.random.choice(runs_g_over_50.loc[:,'playerID'].values)
+    plot_player(name,50)
+
+for p in plots:
+    p.show()
 raw_input()
